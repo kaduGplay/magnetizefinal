@@ -1,3 +1,4 @@
+import { getCatalogPlan } from "../../supabase/functions/_shared/planCatalog";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { 
@@ -59,11 +60,13 @@ const Checkout = () => {
 
 
   const planId = searchParams.get("plan") || "";
-  const planName = searchParams.get("name") || "";
-  const amount = parseInt(searchParams.get("amount") || "0");
-  const credits = parseInt(searchParams.get("credits") || "0");
-  const isLifetime = searchParams.get("isLifetime") === "true";
-  const isPremium = searchParams.get("isPremium") === "true";
+  // Use the same catalog as the PIX backend; URL amounts are not authoritative.
+  const catalogPlan = getCatalogPlan(planId);
+  const planName = catalogPlan?.name || "";
+  const amount = catalogPlan?.amount || 0;
+  const credits = catalogPlan?.credits || 0;
+  const isLifetime = catalogPlan?.isLifetime || false;
+  const isPremium = catalogPlan?.isPremium || false;
 
   // Capture UTM parameters from URL
   const utmParams = {

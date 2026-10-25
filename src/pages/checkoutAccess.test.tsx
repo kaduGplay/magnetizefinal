@@ -15,7 +15,7 @@ vi.mock("@/lib/facebook-pixel", () => ({ initFacebookPixel: vi.fn(), trackViewCo
 vi.mock("@/lib/tiktok-pixel", () => ({ initTikTokPixel: vi.fn(), trackViewContent: vi.fn(), trackInitiateCheckout: vi.fn() }));
 const path = "/checkout?plan=credit-pack-500&name=500+Créditos&amount=990&credits=500";
 const AuthDestination = () => <div>Retorno: {useLocation().state?.returnTo}</div>;
-const mount = () => render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/checkout" element={<Checkout />} /><Route path="/auth" element={<AuthDestination />} /></Routes></MemoryRouter>);
+const mount = (entry = path) => render(<MemoryRouter initialEntries={[entry]}><Routes><Route path="/checkout" element={<Checkout />} /><Route path="/auth" element={<AuthDestination />} /></Routes></MemoryRouter>);
 afterEach(() => { cleanup(); vi.resetAllMocks(); mocks.auth.profile = null; mocks.auth.isAuthenticated = false; localStorage.clear(); });
 describe("checkout access and validity", () => {
   it("preserves the complete checkout when login is required", async () => {
@@ -35,4 +35,28 @@ describe("checkout access and validity", () => {
     mocks.access.mockResolvedValue({ success: false, error: "Erro de conexão." }); mount();
     await waitFor(() => expect(screen.getByText("Erro de conexão.")).toBeTruthy()); expect(mocks.invoke).not.toHaveBeenCalled();
   });
+  it("displays and submits catalog values even when URL pricing and entitlements were changed", async () => {
+    mocks.auth.profile = { id: "user", full_name: "Teste", email: "teste@example.com", phone: null }; mocks.auth.isAuthenticated = true;
+    mocks.access.mockResolvedValue({ success: true, status: "waiting_payment" });
+    mocks.invoke.mockResolvedValue({ data: { success: true, transactionId: "tx", pixQrcode: "pix-code", pixExpirationDate: null }, error: null });
+    mount("/checkout?plan=credit-pack-500&name=Alterado&amount=1&credits=999999&isLifetime=true&isPremium=true");
+    await waitFor(() => expect(mocks.invoke).toHaveBeenCalledTimes(1));
+    expect(mocks.invoke).toHaveBeenCalledWith("create-pix-payment", expect.objectContaining({ body: expect.objectContaining({ planId: "credit-pack-500", planName: "500 Créditos", amount: 990, credits: 500, isLifetime: false, isPremium: false }) }));
+    expect(screen.getAllByText("R$ 9,90").length).toBeGreaterThan(0);
+    expect(screen.queryByText("R$ 0,01")).toBeNull();
+  });
+  it("accepts a known plan link without requiring a price in the URL", async () => {
+    mocks.auth.profile = { id: "user", full_name: "Teste", email: "teste@example.com", phone: null }; mocks.auth.isAuthenticated = true;
+    mocks.access.mockResolvedValue({ success: true, status: "waiting_payment" });
+    mocks.invoke.mockResolvedValue({ data: { success: true, transactionId: "tx", pixQrcode: "pix-code", pixExpirationDate: null }, error: null });
+    mount("/checkout?plan=lifetime-unlimited");
+    await waitFor(() => expect(mocks.invoke).toHaveBeenCalledWith("create-pix-payment", expect.objectContaining({ body: expect.objectContaining({ amount: 1490, credits: 999999 }) })));
+  });
+  it("rejects unknown plan identifiers without creating a charge", async () => {
+    mocks.auth.profile = { id: "user", full_name: "Teste", email: "teste@example.com", phone: null }; mocks.auth.isAuthenticated = true;
+    mount("/checkout?plan=unknown&name=Invalid&amount=990");
+    expect(await screen.findByText("Dados do plano inválidos")).toBeTruthy();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
+
 });
