@@ -92,11 +92,9 @@ const Dashboard = () => {
 
   const fecharPlanos = () => {
     setEtapa(null);
-  };
-  const continuarDepois = () => {
-    setEtapa(null);
     if (planosDaGeracao) setMostrarOferta(true);
   };
+  const continuarDepois = fecharPlanos;
 
   const comprarOferta = (plan: DownsellPlan | PriorityPlan) => {
     initTikTokPixel();

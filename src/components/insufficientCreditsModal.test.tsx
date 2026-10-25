@@ -45,10 +45,18 @@ describe("plan modal (credits step)", () => {
     const props = { isOpen: true, onClose: () => {}, onBuyCredits: () => {}, currentCredits: 0, requiredCredits: 100 };
     const view = render(<InsufficientCreditsModal {...props} context="browse" />);
     expect(screen.getByRole("heading", { name: "Conheça nossos planos" })).toBeTruthy();
-    expect(screen.queryByText(/Você escolheu uma geração/)).toBeNull();
+    expect(screen.queryByText(/Esta é a etapa de compra dos créditos/)).toBeNull();
     view.rerender(<InsufficientCreditsModal {...props} context="generation" />);
-    expect(screen.getByRole("heading", { name: "Créditos para a geração escolhida" })).toBeTruthy();
-    expect(screen.getByText(/Você escolheu uma geração/)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Para gerar, compre créditos" })).toBeTruthy();
+    expect(screen.getByText(/Esta é a etapa de compra dos créditos/)).toBeTruthy();
+  });
+
+  it("makes the payment step and selected price explicit", () => {
+    render(<InsufficientCreditsModal isOpen onClose={() => {}} onBuyCredits={() => {}} currentCredits={0} requiredCredits={100} />);
+    expect(screen.getByText(/Os créditos serão liberados após a confirmação do pagamento via PIX/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Ir para pagamento · R$ 9,90" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Vídeos ilimitados.*R\$ 14,90/ }));
+    expect(screen.getByRole("button", { name: "Ir para pagamento · R$ 14,90" })).toBeTruthy();
   });
 
   it("the dashboard funnel skips the fake loading screen and goes straight to the plan", () => {

@@ -13,9 +13,9 @@ vi.mock("@/components/CreateAccountModal", () => ({ default: ({ isOpen }: { isOp
 vi.mock("@/components/InsufficientCreditsModal", () => ({ GENERATION_COST: 100, default: ({ isOpen, onClose, context }: { isOpen: boolean; onClose: () => void; context: string }) => isOpen ? <div>Planos abertos<button onClick={onClose}>Fechar planos</button><span>{context}</span></div> : null }));
 vi.mock("@/components/AutoplayVideo", () => ({ default: () => null }));
 vi.mock("@/components/PendingCheckoutNotice", () => ({ default: () => null }));
-vi.mock("@/components/PhotoUploadModal", () => ({ default: () => null }));
+vi.mock("@/components/PhotoUploadModal", () => ({ default: ({ isOpen, onContinue }: { isOpen: boolean; onContinue: () => void }) => isOpen ? <button onClick={onContinue}>Confirmar foto</button> : null }));
 vi.mock("@/components/ServerQueueModal", () => ({ default: () => null }));
-vi.mock("@/components/ExitDownsellModal", () => ({ default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Oferta de saída</div> : null }));
+vi.mock("@/components/ExitDownsellModal", () => ({ default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => isOpen ? <div>Oferta de saída<button onClick={onClose}>Dispensar oferta</button></div> : null }));
 vi.mock("@/components/CreditsModal", () => ({ default: () => null }));
 beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); });
 afterEach(() => { cleanup(); auth.profile = null; auth.isAuthenticated = false; auth.isLoading = false; });
@@ -46,6 +46,21 @@ for (const [name, Page] of [["dashboard", Dashboard]] as const) {
       expect(screen.queryByText("Planos abertos")).toBeNull();
       expect(screen.queryByText("Oferta de saída")).toBeNull();
       expect(screen.queryByText("Cadastro aberto")).toBeNull();
+    });
+    it("shows the exit offer when closing generation credits and returns to the gallery when rejected", async () => {
+      auth.profile = { id: "user", full_name: "Teste", credits: 0, is_premium: false };
+      auth.isAuthenticated = true;
+      render(<Dashboard />);
+      fireEvent.click(screen.getAllByRole("button", { name: /Gerar este/ })[0]);
+      fireEvent.click(screen.getByRole("button", { name: "Confirmar foto" }));
+      expect(await screen.findByText("Planos abertos")).toBeTruthy();
+      expect(screen.getByText("generation")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Fechar planos" }));
+      expect(screen.getByText("Oferta de saída")).toBeTruthy();
+      expect(screen.queryByText("Planos abertos")).toBeNull();
+      fireEvent.click(screen.getByRole("button", { name: "Dispensar oferta" }));
+      expect(screen.queryByText("Oferta de saída")).toBeNull();
+      expect(screen.queryByText("Planos abertos")).toBeNull();
     });
     it("opens plans from the sidebar without leaving the menu over the modal", () => {
       render(<MemoryRouter initialEntries={["/dashboard"]}><Dashboard /></MemoryRouter>);
