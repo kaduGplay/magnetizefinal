@@ -46,13 +46,15 @@ type PlanKey = keyof typeof PLANS;
 interface InsufficientCreditsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onDefer?: () => void;
+  context?: "generation" | "browse";
   onBuyCredits: () => void;
   currentCredits: number;
   requiredCredits: number;
   mediaType?: "photo" | "video";
 }
 
-const InsufficientCreditsModal = ({ isOpen, onClose }: InsufficientCreditsModalProps) => {
+const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generation" }: InsufficientCreditsModalProps) => {
   const [checkoutPlan, setCheckoutPlan] = useState<PlanKey | null>(null);
   const checkoutStarted = useRef(false);
 
@@ -124,8 +126,8 @@ const InsufficientCreditsModal = ({ isOpen, onClose }: InsufficientCreditsModalP
       <DialogContent className="flex max-h-[94dvh] w-[calc(100vw-1rem)] max-w-[430px] flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-2xl font-body">
         <div className="min-h-0 overflow-y-auto px-4 pb-4 pt-5 sm:px-6">
           <div className="mb-3 flex justify-center"><div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10"><Sparkles className="h-5 w-5 text-primary" /></div></div>
-          <DialogTitle className="px-6 text-center font-display text-[23px] font-bold leading-tight text-foreground">Desbloqueie suas próximas criações</DialogTitle>
-          <DialogDescription className="mx-auto mb-5 mt-2 max-w-[340px] text-center text-[13px] leading-relaxed text-muted-foreground">Escolha como continuar. Pagamento único, sem mensalidade.</DialogDescription>
+          <DialogTitle className="px-6 text-center font-display text-[23px] font-bold leading-tight text-foreground">{context === "generation" ? "Desbloqueie esta geração" : "Escolha seu plano"}</DialogTitle>
+          <DialogDescription className="mx-auto mb-5 mt-2 max-w-[340px] text-center text-[13px] leading-relaxed text-muted-foreground">{context === "generation" ? "Use os créditos para iniciar a geração escolhida e criar outras depois." : "Créditos para começar a criar ou acesso vitalício para continuar quando quiser."}</DialogDescription>
 
           <div className="space-y-4" role="group" aria-label="Escolha seu plano">
             <section aria-labelledby="credits-plan-title" className="rounded-xl border border-border bg-secondary/20 p-4">
@@ -155,7 +157,7 @@ const InsufficientCreditsModal = ({ isOpen, onClose }: InsufficientCreditsModalP
         </div>
         <div className="shrink-0 border-t border-border bg-card px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-6">
           <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground"><LockKeyhole className="h-3 w-3" />Pagamento único via PIX · Sem mensalidade</p>
-          <button type="button" onClick={onClose} className="mt-1 min-h-11 w-full touch-manipulation text-center text-xs text-muted-foreground transition-colors hover:text-foreground">Continuar depois</button>
+          <button type="button" onClick={onDefer || onClose} className="mt-1 min-h-11 w-full touch-manipulation text-center text-xs text-muted-foreground transition-colors hover:text-foreground">Continuar depois</button>
         </div>
       </DialogContent>
     </Dialog>

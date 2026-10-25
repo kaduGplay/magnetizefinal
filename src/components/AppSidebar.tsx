@@ -1,247 +1,44 @@
-import { 
-  LayoutDashboard, 
-  Zap, 
-  Image, 
-  Camera, 
-  Crown, 
-  X,
-  User,
-  Shield,
-  EyeOff,
-  Lock,
-  Sparkles,
-  Trash2
-} from "lucide-react";
+import { Camera, Crown, LayoutDashboard, Shield, Trash2, User, Zap } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
 interface AppSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenCredits: () => void;
+  onOpenAccount?: () => void;
   onOpenPhotoGeneration?: () => void;
   onOpenPremiumContent?: () => void;
   onOpenDeleteAccount?: () => void;
   isPremium?: boolean;
 }
 
-const AppSidebar = ({ isOpen, onClose, onOpenCredits, onOpenPhotoGeneration, onOpenPremiumContent, onOpenDeleteAccount, isPremium = false }: AppSidebarProps) => {
-
+export default function AppSidebar({ isOpen, onClose, onOpenCredits, onOpenAccount, onOpenPhotoGeneration, onOpenPremiumContent, onOpenDeleteAccount, isPremium = false }: AppSidebarProps) {
   const navigate = useNavigate();
-  
-  const menuItems = [
-    { 
-      id: "dashboard", 
-      label: "Dashboard", 
-      icon: LayoutDashboard, 
-      isActive: true,
-      onClick: () => navigate("/dashboard")
-    },
-    { 
-      id: "geracoes-rapidas", 
-      label: "Gerações Rápidas", 
-      icon: Zap, 
-      isActive: false,
-      badge: "NOVO",
-      onClick: () => navigate("/fast-generations")
-    },
-    { 
-      id: "gerar-fotos", 
-      label: "Gerar com Fotos", 
-      icon: Camera, 
-      isActive: false,
-      onClick: () => onOpenPhotoGeneration?.()
-    },
-    { 
-      id: "conteudo-premium", 
-      label: "Conteúdo Premium", 
-      icon: Crown, 
-      isActive: false,
-      badge: "PRO",
-      onClick: () => onOpenPremiumContent?.()
-    },
-    { 
-      id: "adquirir-creditos", 
-      label: "Planos", 
-      icon: Crown, 
-      isActive: false,
-      onClick: () => onOpenCredits()
-    },
-
+  const location = useLocation();
+  const links = [
+    { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+    { label: "Gerações rápidas", icon: Zap, path: "/fast-generations" },
+    { label: "Política de privacidade", icon: Shield, path: "/politic" },
+    { label: "Termos de uso", icon: Shield, path: "/terms" },
   ];
-
+  const run = (action: () => void) => { onClose(); action(); };
   return (
-    <>
-      {/* Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/70 backdrop-blur-md z-40 transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={onClose}
-      />
-      
-      {/* Sidebar */}
-      <aside 
-        className={`fixed left-0 top-0 bottom-0 w-80 z-50 transform transition-transform duration-300 ease-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Background with glassmorphism */}
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/95 via-black/98 to-zinc-950/95 backdrop-blur-xl" />
-        
-        {/* Glow effects */}
-        <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent pointer-events-none" />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary/10 to-transparent pointer-events-none" />
-        
-        <div className="relative h-full flex flex-col p-6">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-primary/30 blur-lg rounded-full" />
-                <img 
-                  src="/media/logo.jpeg"
-                  alt="Magnetize"
-                  className="relative h-8 w-auto rounded-lg"
-                />
-              </div>
-            </div>
-            <button 
-              onClick={onClose}
-              className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white transition-all duration-300 hover:scale-105"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* User Card */}
-          <div className="mb-8 p-5 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/30 backdrop-blur-sm relative overflow-hidden group">
-            {/* Animated glow */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            <div className="relative flex items-center gap-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-red-600 flex items-center justify-center shadow-xl shadow-primary/40">
-                <User className="h-7 w-7 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-base truncate">Acesso individual</h3>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <Shield className="h-3 w-3 text-success" />
-                  <p className="text-success text-xs font-medium">Modo Anônimo Ativo</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Security Badges */}
-          <div className="flex gap-2 mb-6">
-            <div className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-success/10 border border-success/20">
-              <EyeOff className="h-3.5 w-3.5 text-success" />
-              <span className="text-[10px] font-semibold text-success">ANÔNIMO</span>
-            </div>
-            <div className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-success/10 border border-success/20">
-              <Lock className="h-3.5 w-3.5 text-success" />
-              <span className="text-[10px] font-semibold text-success">SEGURO</span>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 space-y-2 overflow-y-auto">
-            {menuItems.map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    item.onClick();
-                    if (item.id !== "adquirir-creditos") {
-                      onClose();
-                    }
-                  }}
-                  className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-300 group relative ${
-                    item.isActive 
-                      ? "text-white" 
-                      : "text-white/60 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  {/* Active background */}
-                  {item.isActive && (
-                    <>
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary to-red-600 rounded-xl shadow-lg shadow-primary/30" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/10 to-primary/0 rounded-xl" />
-                    </>
-                  )}
-                  
-                  <IconComponent className={`relative h-5 w-5 flex-shrink-0 ${
-                    item.isActive ? "text-white" : "text-white/50 group-hover:text-white/80"
-                  }`} />
-                  <span className="relative text-sm font-medium flex-1 text-left">{item.label}</span>
-                  
-                  {item.badge && (
-                    <span className={`relative text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                      item.badge === "PRO" 
-                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
-                        : "bg-gradient-to-r from-emerald-500 to-green-500 text-white"
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Footer */}
-          <div className="pt-6 border-t border-white/10">
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-white/10 via-white/5 to-transparent border border-white/10 backdrop-blur-sm relative overflow-hidden">
-              {/* Subtle animation */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-primary/20 rounded-full blur-2xl" />
-              
-              <div className="relative">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 border border-primary/30 flex items-center justify-center">
-                    <Crown className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-white/50 text-xs font-medium">Seu plano</p>
-                    <p className="text-white font-black text-2xl">{isPremium ? "Vitalício" : "Básico"}</p>
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => {
-                    onOpenCredits();
-                    onClose();
-                  }}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-primary via-red-500 to-primary bg-[length:200%_100%] hover:bg-right text-white text-sm font-bold shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-500 flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  {isPremium ? "Ver meu plano" : "Liberar Vitalício"}
-                </Button>
-
-              </div>
-            </div>
-            
-            {/* Security note */}
-            <p className="text-center text-white/30 text-[10px] mt-4 flex items-center justify-center gap-1">
-              <Lock className="h-3 w-3" />
-              Seus dados estão protegidos
-            </p>
-
-            {/* Discreet: Apagar Conta */}
-            {onOpenDeleteAccount && (
-              <button
-                onClick={() => { onOpenDeleteAccount(); onClose(); }}
-                className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 text-white/30 hover:text-white/60 text-[11px] transition-colors"
-              >
-                <Trash2 className="h-3 w-3" />
-                <span>Apagar conta</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </aside>
-    </>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent id="dashboard-navigation" className="left-0 top-0 flex h-[100dvh] max-h-[100dvh] w-[min(20rem,calc(100vw-2rem))] max-w-[20rem] sm:w-[20rem] translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-y-0 border-l-0 bg-card p-5 sm:rounded-none">
+        <DialogTitle className="pr-12 text-xl font-bold">Magnetize</DialogTitle>
+        <DialogDescription className="mb-6 mt-2 text-sm">Menu de navegação</DialogDescription>
+        <nav aria-label="Navegação da dashboard" className="min-h-0 flex-1 space-y-2 overflow-y-auto">
+          <Button type="button" onClick={() => run(onOpenCredits)} className="mb-3 h-12 w-full justify-start gap-3 rounded-xl"><Crown className="h-4 w-4" />Ver planos</Button>
+          {links.map(({ label, icon: Icon, path }) => <button key={path} type="button" aria-current={location.pathname === path ? "page" : undefined} onClick={() => run(() => navigate(path))} className="flex min-h-12 w-full touch-manipulation items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-foreground transition-colors hover:bg-muted aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary"><Icon className="h-4 w-4 shrink-0" />{label}</button>)}
+          {onOpenAccount && <Button type="button" variant="ghost" onClick={() => run(onOpenAccount)} className="h-12 w-full justify-start gap-3 rounded-xl"><User className="h-4 w-4" />Minha conta</Button>}
+          {onOpenPhotoGeneration && <Button type="button" variant="ghost" onClick={() => run(onOpenPhotoGeneration)} className="h-12 w-full justify-start gap-3 rounded-xl"><Camera className="h-4 w-4" />Gerar com fotos</Button>}
+          {onOpenPremiumContent && <Button type="button" variant="ghost" onClick={() => run(onOpenPremiumContent)} className="h-12 w-full justify-start gap-3 rounded-xl"><Crown className="h-4 w-4" />Conteúdo premium</Button>}
+          {onOpenDeleteAccount && <Button type="button" variant="ghost" onClick={() => run(onOpenDeleteAccount)} className="h-12 w-full justify-start gap-3 rounded-xl"><Trash2 className="h-4 w-4" />Apagar conta</Button>}
+        </nav>
+        <p className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground">{isPremium ? "Seu acesso: Premium" : "Conheça os planos disponíveis"}</p>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default AppSidebar;
+}

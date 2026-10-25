@@ -37,6 +37,20 @@ describe("plan modal direct checkout", () => {
     expect(assign).not.toHaveBeenCalled();
   });
 
+  it("uses different copy for a chosen generation and browsing plans", () => {
+    const view = render(<InsufficientCreditsModal {...props} />);
+    expect(screen.getByRole("heading", { name: "Desbloqueie esta geração" })).toBeTruthy();
+    view.rerender(<InsufficientCreditsModal {...props} context="browse" />);
+    expect(screen.getByRole("heading", { name: "Escolha seu plano" })).toBeTruthy();
+  });
+  it("the X dismisses the modal without triggering the optional exit offer", () => {
+    const defer = vi.fn();
+    render(<InsufficientCreditsModal {...props} onDefer={defer} />);
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(props.onClose).toHaveBeenCalledTimes(1);
+    expect(defer).not.toHaveBeenCalled();
+    expect(assign).not.toHaveBeenCalled();
+  });
   it("allows another choice when reopened after a checkout navigation", () => {
     const view = render(<InsufficientCreditsModal {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Desbloquear por R$ 9,90" }));

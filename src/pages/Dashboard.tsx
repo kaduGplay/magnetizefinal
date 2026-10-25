@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MousePointerClick, Lock, EyeOff, Shield, Play, Crown, Zap, Bell, KeyRound } from "lucide-react";
+import { MousePointerClick, Lock, EyeOff, Shield, Play, Crown, Zap, Menu, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CreateAccountModal from "@/components/CreateAccountModal";
 import LoginCodeModal from "@/components/LoginCodeModal";
@@ -7,6 +7,7 @@ import PhotoUploadModal from "@/components/PhotoUploadModal";
 import InsufficientCreditsModal, { GENERATION_COST } from "@/components/InsufficientCreditsModal";
 import UserAccountModal from "@/components/UserAccountModal";
 import CreditsModal from "@/components/CreditsModal";
+import AppSidebar from "@/components/AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useUtmCapture } from "@/hooks/useUtmParams";
 import { listaDeVideos } from "@/videos/listaDeVideos";
@@ -33,6 +34,8 @@ const Dashboard = () => {
   const [mostrarLogin, setMostrarLogin] = useState(false);
   const [mostrarOferta, setMostrarOferta] = useState(false);
   const [mostrarFila, setMostrarFila] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [planosDaGeracao, setPlanosDaGeracao] = useState(false);
 
   const { profile, isAuthenticated, isLoading: authLoading } = useAuth();
   const [mostrarConta, setMostrarConta] = useState(false);
@@ -43,6 +46,11 @@ const Dashboard = () => {
   // Foto → criar conta ou seletor de planos, direto.
   const [etapa, setEtapa] = useState<null | "foto" | "planos" | "creditos">(null);
   const espera = (fn: () => void) => setTimeout(fn, 260);
+  const abrirPlanos = () => {
+    setMenuAberto(false);
+    setPlanosDaGeracao(false);
+    setEtapa("planos");
+  };
 
   // Retoma somente a escolha feita antes de entrar; fechar permite trocar o vídeo.
   const continuarAposLogin = () => {
@@ -77,13 +85,17 @@ const Dashboard = () => {
       // com a oferta prioritária vitalícia, em vez do seletor de planos.
       espera(() => setMostrarFila(true));
     } else {
+      setPlanosDaGeracao(true);
       espera(() => setEtapa("planos"));
     }
   };
 
   const fecharPlanos = () => {
     setEtapa(null);
-    setMostrarOferta(true);
+  };
+  const continuarDepois = () => {
+    setEtapa(null);
+    if (planosDaGeracao) setMostrarOferta(true);
   };
 
   const comprarOferta = (plan: DownsellPlan | PriorityPlan) => {
@@ -110,28 +122,24 @@ const Dashboard = () => {
       <header className="sticky top-0 z-30">
         <div className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-border/50" />
         <div className="container relative flex h-16 items-center justify-between px-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full" />
-            <img src="/media/logo.jpeg" alt="Magnetize" className="relative h-7 w-auto rounded-lg" />
+          <div className="flex min-w-0 items-center gap-2">
+            <Button type="button" variant="ghost" size="icon" aria-label="Abrir menu" aria-expanded={menuAberto} aria-controls="dashboard-navigation" onClick={() => setMenuAberto(true)} className="h-12 w-12 shrink-0 touch-manipulation rounded-xl"><Menu className="h-5 w-5" /></Button>
+            <img src="/media/logo.jpeg" alt="Magnetize" className="h-7 w-auto max-w-[90px] rounded-lg object-contain" />
           </div>
           <div className="flex items-center gap-2 md:gap-3">
             <button
               type="button"
-              onClick={() => setEtapa("planos")}
+              onClick={abrirPlanos}
               className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border text-xs font-bold bg-white/5 border-white/10 text-foreground hover:bg-white/10"
             >
               <Zap className="h-3.5 w-3.5 text-primary" />{profile?.credits ?? 0}
             </button>
             <Button
-              onClick={() => setEtapa("planos")}
-              className="hidden sm:inline-flex bg-gradient-to-r from-primary to-red-600 text-primary-foreground text-xs px-4 py-2 h-9 gap-2 rounded-xl shadow-lg shadow-primary/25"
+              onClick={abrirPlanos}
+              className="inline-flex touch-manipulation bg-gradient-to-r from-primary to-red-600 text-primary-foreground text-xs px-3 py-2 h-12 gap-1.5 rounded-xl shadow-lg shadow-primary/25"
             >
               <Crown className="h-4 w-4" />
               <span>Ver planos</span>
-            </Button>
-            <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl hover:bg-white/5">
-              <Bell className="h-4 w-4" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full animate-pulse"></span>
             </Button>
             <Button
               variant="ghost"
@@ -279,10 +287,11 @@ const Dashboard = () => {
         </div>
       </main>
 
+      {menuAberto && <AppSidebar isOpen onClose={() => setMenuAberto(false)} onOpenCredits={abrirPlanos} onOpenAccount={abrirConta} isPremium={profile?.is_premium ?? false} />}
       <UserAccountModal
         isOpen={mostrarConta && isAuthenticated}
         onClose={() => setMostrarConta(false)}
-        onOpenCredits={() => { setMostrarConta(false); setEtapa("planos"); }}
+        onOpenCredits={() => { setMostrarConta(false); abrirPlanos(); }}
       />
 
       <PhotoUploadModal
@@ -310,6 +319,8 @@ const Dashboard = () => {
       <InsufficientCreditsModal
         isOpen={etapa === "planos"}
         onClose={fecharPlanos}
+        onDefer={continuarDepois}
+        context={planosDaGeracao ? "generation" : "browse"}
         onBuyCredits={() => { setEtapa(null); espera(() => setEtapa("creditos")); }}
         currentCredits={profile?.credits ?? 0}
         requiredCredits={GENERATION_COST}

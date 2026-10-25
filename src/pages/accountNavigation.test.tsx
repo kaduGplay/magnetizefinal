@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Index from "./Index";
 import Dashboard from "./Dashboard";
@@ -10,12 +10,12 @@ vi.mock("@/hooks/useUtmParams", () => ({ useUtmCapture: () => {}, getStoredUtmPa
 vi.mock("@/components/UserAccountModal", () => ({ default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Conta aberta</div> : null }));
 vi.mock("@/components/LoginCodeModal", () => ({ default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Login aberto</div> : null }));
 vi.mock("@/components/CreateAccountModal", () => ({ default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Cadastro aberto</div> : null }));
-vi.mock("@/components/InsufficientCreditsModal", () => ({ GENERATION_COST: 100, default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Planos abertos</div> : null }));
+vi.mock("@/components/InsufficientCreditsModal", () => ({ GENERATION_COST: 100, default: ({ isOpen, onClose, context }: { isOpen: boolean; onClose: () => void; context: string }) => isOpen ? <div>Planos abertos<button onClick={onClose}>Fechar planos</button><span>{context}</span></div> : null }));
 vi.mock("@/components/AutoplayVideo", () => ({ default: () => null }));
 vi.mock("@/components/PendingCheckoutNotice", () => ({ default: () => null }));
 vi.mock("@/components/PhotoUploadModal", () => ({ default: () => null }));
 vi.mock("@/components/ServerQueueModal", () => ({ default: () => null }));
-vi.mock("@/components/ExitDownsellModal", () => ({ default: () => null }));
+vi.mock("@/components/ExitDownsellModal", () => ({ default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Oferta de saída</div> : null }));
 vi.mock("@/components/CreditsModal", () => ({ default: () => null }));
 beforeEach(() => { vi.spyOn(window, "scrollTo").mockImplementation(() => {}); });
 afterEach(() => { cleanup(); auth.profile = null; auth.isAuthenticated = false; auth.isLoading = false; });
@@ -37,6 +37,29 @@ for (const [name, Page] of [["dashboard", Dashboard]] as const) {
       render(<Page />); fireEvent.click(screen.getByRole("button", { name: "0" }));
       expect(screen.getByText("Planos abertos")).toBeTruthy();
       expect(screen.queryByText("Cadastro aberto")).toBeNull();
+    });
+    it("opens plans directly and the X closes without opening another offer", () => {
+      render(<Dashboard />);
+      fireEvent.click(screen.getByRole("button", { name: "Ver planos" }));
+      expect(screen.getByText("browse")).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Fechar planos" }));
+      expect(screen.queryByText("Planos abertos")).toBeNull();
+      expect(screen.queryByText("Oferta de saída")).toBeNull();
+      expect(screen.queryByText("Cadastro aberto")).toBeNull();
+    });
+    it("opens plans from the sidebar without leaving the menu over the modal", () => {
+      render(<MemoryRouter initialEntries={["/dashboard"]}><Dashboard /></MemoryRouter>);
+      fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+      const menu = screen.getByRole("navigation", { name: "Navegação da dashboard" });
+      fireEvent.click(within(menu).getByRole("button", { name: "Ver planos" }));
+      expect(screen.getByText("Planos abertos")).toBeTruthy();
+      expect(screen.queryByRole("navigation", { name: "Navegação da dashboard" })).toBeNull();
+    });
+    it("navigates to another page from the sidebar", () => {
+      render(<MemoryRouter initialEntries={["/dashboard"]}><Routes><Route path="/dashboard" element={<Dashboard />} /><Route path="/fast-generations" element={<div>Outra página aberta</div>} /></Routes></MemoryRouter>);
+      fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+      fireEvent.click(screen.getByRole("button", { name: "Gerações rápidas" }));
+      expect(screen.getByText("Outra página aberta")).toBeTruthy();
     });
     it("waits for session restoration before opening account", () => {
       auth.isLoading = true; render(<Page />);
