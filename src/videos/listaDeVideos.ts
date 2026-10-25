@@ -15,6 +15,7 @@ export type VideoDaDashboard = {
 
 export const listaDeVideos: VideoDaDashboard[] = [
   { link: ahegaoVideo, descricao: "Ahegao" },
+  { link: "https://porncreate-media.b-cdn.net/porncreate/uploads/demos/pov-cowgirl-v2-39eafc5e.webm", descricao: "CowGirl V2" },
   { link: boqueteVideo, descricao: "Boquete" },
   { link: cowgirlVideo, descricao: "Cowgirl" },
   { link: masturbacaoPeitosVideo, descricao: "Masturbação com peitos" },
