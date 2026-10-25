@@ -16,6 +16,10 @@ export type VideoDaDashboard = {
 export const listaDeVideos: VideoDaDashboard[] = [
   { link: ahegaoVideo, descricao: "Ahegao" },
   { link: "https://porncreate-media.b-cdn.net/porncreate/uploads/demos/pov-cowgirl-v2-39eafc5e.webm", descricao: "CowGirl V2" },
+  { link: "https://porncreate-media.b-cdn.net/porncreate/uploads/demos/creampie-5fa42bb9.webm", descricao: "Gozada Gostosa" },
+  { link: "https://porncreate-media.b-cdn.net/porncreate/uploads/demos/kneeling-blowjob-e41c9029.webm", descricao: "Sexo intenso" },
+  { link: "https://porncreate-media.b-cdn.net/porncreate/uploads/demos/pussy-rubbing-creampie-40846a5f-961a2f09.webm", descricao: "Siririca" },
+  { link: "https://porncreate-media.b-cdn.net/porncreate/uploads/demos/ulora-283-8690d0e4.webm", descricao: "Fudendo na neve" },
   { link: boqueteVideo, descricao: "Boquete" },
   { link: cowgirlVideo, descricao: "Cowgirl" },
   { link: masturbacaoPeitosVideo, descricao: "Masturbação com peitos" },
