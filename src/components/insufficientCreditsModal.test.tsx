@@ -41,6 +41,16 @@ describe("plan modal (credits step)", () => {
     expect(defer).not.toHaveBeenCalled();
   });
 
+  it("uses plan browsing copy only when opened outside the generation funnel", () => {
+    const props = { isOpen: true, onClose: () => {}, onBuyCredits: () => {}, currentCredits: 0, requiredCredits: 100 };
+    const view = render(<InsufficientCreditsModal {...props} context="browse" />);
+    expect(screen.getByRole("heading", { name: "Conheça nossos planos" })).toBeTruthy();
+    expect(screen.queryByText(/Você já escolheu o vídeo/)).toBeNull();
+    view.rerender(<InsufficientCreditsModal {...props} context="generation" />);
+    expect(screen.getByRole("heading", { name: "Seu vídeo está quase pronto para gerar!" })).toBeTruthy();
+    expect(screen.getByText(/Você já escolheu o vídeo/)).toBeTruthy();
+  });
+
   it("the dashboard funnel skips the fake loading screen and goes straight to the plan", () => {
     expect(generationStep(false, 100, 100)).toBe("account");
     expect(generationStep(true, 99, 100)).toBe("plans");

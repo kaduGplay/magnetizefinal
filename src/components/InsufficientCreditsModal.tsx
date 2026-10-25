@@ -63,7 +63,7 @@ interface InsufficientCreditsModalProps {
   mediaType?: "photo" | "video";
 }
 
-const InsufficientCreditsModal = ({ isOpen, onClose, onDefer }: InsufficientCreditsModalProps) => {
+const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generation" }: InsufficientCreditsModalProps) => {
   const [selected, setSelected] = useState<PlanKey>("credits");
   const checkoutStarted = useRef(false);
 
@@ -163,12 +163,12 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer }: InsufficientCred
 
           {/* TÍTULO */}
           <DialogTitle className="pr-5 text-center font-display text-[23px] font-bold leading-tight text-foreground">
-            Seu vídeo está quase pronto para gerar!
+            {context === "browse" ? "Conheça nossos planos" : "Seu vídeo está quase pronto para gerar!"}
           </DialogTitle>
 
           {/* DESCRIÇÃO */}
           <DialogDescription className="mx-auto mt-2 max-w-[340px] text-center text-[13px] leading-relaxed text-muted-foreground">
-            Você já escolheu o vídeo que deseja criar. Agora só falta desbloquear seus créditos para continuar.
+            {context === "browse" ? "Compare as opções e escolha o plano ideal para você. Pagamento único, sem mensalidade." : "Você já escolheu o vídeo que deseja criar. Agora só falta desbloquear seus créditos para continuar."}
           </DialogDescription>
 
           {/* DESTAQUE */}
@@ -176,7 +176,7 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer }: InsufficientCred
             <Zap className="h-4 w-4 shrink-0 text-primary" />
 
             <p className="text-center text-xs font-medium text-foreground">
-              Desbloqueie a geração do seu vídeo com um único pagamento
+              {context === "browse" ? "Créditos ou acesso vitalício: escolha como continuar" : "Desbloqueie a geração do seu vídeo com um único pagamento"}
             </p>
           </div>
 
@@ -326,7 +326,7 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer }: InsufficientCred
 
           {/* REFORÇO */}
           <div className="mt-4 text-center">
-            <p className="text-xs font-medium text-foreground">Seu próximo vídeo começa aqui</p>
+            <p className="text-xs font-medium text-foreground">{context === "browse" ? "Seu plano, sua escolha" : "Seu próximo vídeo começa aqui"}</p>
 
             <p className="mt-1 text-[11px] text-muted-foreground">Escolha seu plano e continue criando.</p>
           </div>
