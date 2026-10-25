@@ -51,14 +51,23 @@ for (const [name, Page] of [["dashboard", Dashboard]] as const) {
       render(<MemoryRouter initialEntries={["/dashboard"]}><Dashboard /></MemoryRouter>);
       fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
       const menu = screen.getByRole("navigation", { name: "Navegação da dashboard" });
-      fireEvent.click(within(menu).getByRole("button", { name: "Ver planos" }));
+      fireEvent.click(within(menu).getByRole("button", { name: "Adquirir Créditos" }));
       expect(screen.getByText("Planos abertos")).toBeTruthy();
       expect(screen.queryByRole("navigation", { name: "Navegação da dashboard" })).toBeNull();
+    });
+    it("shows the original credit menu without presenting unavailable actions as working", () => {
+      render(<MemoryRouter><Dashboard /></MemoryRouter>);
+      fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+      const menu = within(screen.getByRole("navigation", { name: "Navegação da dashboard" }));
+      expect(menu.getByRole("button", { name: "Adquirir Créditos" })).not.toBeDisabled();
+      for (const name of ["Gerar com Fotos", "Conteúdo Premium", "Resgatar Créditos"]) {
+        expect(menu.getByRole("button", { name })).toBeDisabled();
+      }
     });
     it("navigates to another page from the sidebar", () => {
       render(<MemoryRouter initialEntries={["/dashboard"]}><Routes><Route path="/dashboard" element={<Dashboard />} /><Route path="/fast-generations" element={<div>Outra página aberta</div>} /></Routes></MemoryRouter>);
       fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
-      fireEvent.click(screen.getByRole("button", { name: "Gerações rápidas" }));
+      fireEvent.click(screen.getByRole("button", { name: "Gerações Rápidas" }));
       expect(screen.getByText("Outra página aberta")).toBeTruthy();
     });
     it("waits for session restoration before opening account", () => {

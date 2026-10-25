@@ -287,7 +287,7 @@ const Dashboard = () => {
         </div>
       </main>
 
-      {menuAberto && <AppSidebar isOpen onClose={() => setMenuAberto(false)} onOpenCredits={abrirPlanos} onOpenAccount={abrirConta} isPremium={profile?.is_premium ?? false} />}
+      {menuAberto && <AppSidebar isOpen onClose={() => setMenuAberto(false)} onOpenCredits={abrirPlanos} onOpenAccount={abrirConta} credits={profile?.credits ?? 0} isPremium={profile?.is_premium ?? false} />}
       <UserAccountModal
         isOpen={mostrarConta && isAuthenticated}
         onClose={() => setMostrarConta(false)}
