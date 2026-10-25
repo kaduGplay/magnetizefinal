@@ -83,11 +83,9 @@ const HeroSection = ({ onCTAClick }: HeroSectionProps) => {
         <div className="order-2 mt-6 md:mt-7 text-center space-y-5 md:space-y-7">
           {/* Main Headline */}
           <h1 className="text-[26px] leading-[1.15] sm:text-3xl md:text-5xl lg:text-6xl font-black tracking-tight">
-            <span className="text-foreground">Manda a foto dela.</span>
+            <span className="text-foreground">Envie qualquer foto e ganhe um</span>
             <br />
-            <span className="text-gradient-shine">Em 30 segundos</span>{" "}
-            <span className="text-foreground"> gere ela</span> <span className="text-primary">pelada, mamando</span>{" "}
-            <span className="text-foreground">ou</span> <span className="text-primary"> sendo fodida</span>.
+            <span className="text-gradient-shine">vídeo 18+ quente</span>{" "}
           </h1>
 
           {/* Subheadline */}
