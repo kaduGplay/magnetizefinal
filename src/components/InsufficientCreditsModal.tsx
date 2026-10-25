@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle2, Infinity as InfinityIcon, Loader2, LockKeyhole, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  CreditCard,
+  Infinity as InfinityIcon,
+  LockKeyhole,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -54,26 +63,25 @@ interface InsufficientCreditsModalProps {
   mediaType?: "photo" | "video";
 }
 
-const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generation" }: InsufficientCreditsModalProps) => {
-  const [checkoutPlan, setCheckoutPlan] = useState<PlanKey | null>(null);
+const InsufficientCreditsModal = ({ isOpen, onClose, onDefer }: InsufficientCreditsModalProps) => {
+  const [selected, setSelected] = useState<PlanKey>("credits");
   const checkoutStarted = useRef(false);
 
-
+  const selectedPlan = PLANS[selected];
 
   useEffect(() => {
     if (isOpen) {
-      setCheckoutPlan(null);
+      setSelected("credits");
       checkoutStarted.current = false;
     }
   }, [isOpen]);
 
-  const goToCheckout = (key: PlanKey) => {
+  const goToCheckout = () => {
     if (checkoutStarted.current) return;
 
     checkoutStarted.current = true;
-    setCheckoutPlan(key);
 
-    const plan = PLANS[key];
+    const plan = PLANS[selected];
 
     const params = new URLSearchParams({
       plan: plan.id,
@@ -119,45 +127,266 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generat
     window.location.assign(`/checkout?${params.toString()}`);
   };
 
-  const priceDifference = ((PLANS.lifetime.amountCents - PLANS.credits.amountCents) / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="flex max-h-[94dvh] w-[calc(100vw-1rem)] max-w-[430px] flex-col gap-0 overflow-hidden rounded-2xl border border-border bg-card p-0 shadow-2xl font-body">
-        <div className="min-h-0 overflow-y-auto px-4 pb-4 pt-5 sm:px-6">
-          <div className="mb-3 flex justify-center"><div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10"><Sparkles className="h-5 w-5 text-primary" /></div></div>
-          <DialogTitle className="px-6 text-center font-display text-[23px] font-bold leading-tight text-foreground">{context === "generation" ? "Desbloqueie esta geração" : "Escolha seu plano"}</DialogTitle>
-          <DialogDescription className="mx-auto mb-5 mt-2 max-w-[340px] text-center text-[13px] leading-relaxed text-muted-foreground">{context === "generation" ? "Use os créditos para iniciar a geração escolhida e criar outras depois." : "Créditos para começar a criar ou acesso vitalício para continuar quando quiser."}</DialogDescription>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <DialogContent
+        className="
+          flex
+          max-h-[94dvh]
+          w-[calc(100vw-1rem)]
+          max-w-[430px]
+          flex-col
+          gap-0
+          overflow-hidden
+          rounded-2xl
+          border
+          border-border
+          bg-card
+          p-0
+          shadow-2xl
+          font-body
+        "
+      >
+        {/* CONTEÚDO */}
+        <div className="min-h-0 overflow-y-auto px-4 pb-4 pt-6 sm:px-6">
+          {/* ÍCONE */}
+          <div className="mb-3 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+              <Sparkles className="h-6 w-6 text-primary" />
+            </div>
+          </div>
 
-          <div className="space-y-4" role="group" aria-label="Escolha seu plano">
-            <section aria-labelledby="credits-plan-title" className="rounded-xl border border-border bg-secondary/20 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div><h3 id="credits-plan-title" className="text-base font-bold text-foreground">{PLANS.credits.title}</h3><p className="mt-1 text-xs text-muted-foreground">Até {PLANS.credits.credits / GENERATION_COST} vídeos com seus créditos</p></div>
-                <span className="whitespace-nowrap text-xl font-extrabold text-foreground">{PLANS.credits.price}</span>
-              </div>
-              <Button type="button" variant="outline" disabled={checkoutPlan !== null} onClick={() => goToCheckout("credits")} className="mt-4 h-12 w-full touch-manipulation rounded-xl border-primary/40 text-sm font-bold">
-                {checkoutPlan === "credits" ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
-                <span className="min-w-0 whitespace-normal leading-tight">Desbloquear por {PLANS.credits.price}</span><ArrowRight className="h-4 w-4" />
-              </Button>
-            </section>
+          {/* TÍTULO */}
+          <DialogTitle className="pr-5 text-center font-display text-[23px] font-bold leading-tight text-foreground">
+            Seu vídeo está quase pronto para gerar!
+          </DialogTitle>
 
-            <section aria-labelledby="lifetime-plan-title" className="rounded-xl border-2 border-primary bg-primary/5 p-4 shadow-sm">
-              <p className="mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-primary"><Sparkles className="h-3.5 w-3.5" />Melhor custo-benefício</p>
+          {/* DESCRIÇÃO */}
+          <DialogDescription className="mx-auto mt-2 max-w-[340px] text-center text-[13px] leading-relaxed text-muted-foreground">
+            Você já escolheu o vídeo que deseja criar. Agora só falta desbloquear seus créditos para continuar.
+          </DialogDescription>
+
+          {/* DESTAQUE */}
+          <div className="mt-4 flex items-center justify-center gap-2 rounded-lg border border-primary/15 bg-primary/5 px-3 py-3">
+            <Zap className="h-4 w-4 shrink-0 text-primary" />
+
+            <p className="text-center text-xs font-medium text-foreground">
+              Desbloqueie a geração do seu vídeo com um único pagamento
+            </p>
+          </div>
+
+          {/* TÍTULO DOS PLANOS */}
+          <div className="mb-3 mt-5 flex items-center justify-between gap-2">
+            <h3 className="text-sm font-bold text-foreground">Escolha seu plano</h3>
+
+            <span className="text-[11px] text-muted-foreground">Sem mensalidade</span>
+          </div>
+
+          {/* PLANOS */}
+          <div className="space-y-3" role="group" aria-label="Escolha seu plano">
+            {/* PACOTE DE CRÉDITOS */}
+            <button
+              type="button"
+              aria-pressed={selected === "credits"}
+              onClick={() => setSelected("credits")}
+              className={`
+                relative w-full rounded-xl border-2 p-4 text-left
+                transition-all duration-200
+                ${
+                  selected === "credits"
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border bg-secondary/20 hover:border-primary/40"
+                }
+              `}
+            >
               <div className="flex items-start justify-between gap-3">
-                <div><h3 id="lifetime-plan-title" className="flex items-center gap-2 text-base font-bold text-foreground"><InfinityIcon className="h-5 w-5 text-primary" />Acesso vitalício</h3><p className="mt-1 text-xs text-muted-foreground">Sem limite de créditos</p></div>
-                <span className="whitespace-nowrap text-xl font-extrabold text-foreground">{PLANS.lifetime.price}</span>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] font-semibold text-muted-foreground">PARA COMEÇAR</span>
+
+                  <h4 className="mt-1 text-[17px] font-bold text-foreground">500 créditos</h4>
+
+                  <p className="mt-1 text-xs text-muted-foreground">Gere até 5 vídeos com seus créditos</p>
+                </div>
+
+                <div
+                  className={`
+                    flex h-5 w-5 shrink-0 items-center justify-center
+                    rounded-full border-2
+                    ${
+                      selected === "credits"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-muted-foreground/40"
+                    }
+                  `}
+                >
+                  {selected === "credits" && <Check className="h-3 w-3" />}
+                </div>
               </div>
-              <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-foreground"><CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />Vitalício por mais {priceDifference}</p>
-              <Button type="button" disabled={checkoutPlan !== null} onClick={() => goToCheckout("lifetime")} className="mt-4 h-12 w-full touch-manipulation rounded-xl text-sm font-bold shadow-lg shadow-primary/20">
-                {checkoutPlan === "lifetime" ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
-                <span className="min-w-0 whitespace-normal leading-tight">Desbloquear vitalício por {PLANS.lifetime.price}</span><ArrowRight className="h-4 w-4" />
-              </Button>
-            </section>
+
+              <div className="mt-3 flex items-end justify-between gap-2">
+                <div>
+                  <span className="text-[27px] font-extrabold leading-none text-foreground">R$ 9,90</span>
+
+                  <p className="mt-1 text-[11px] text-muted-foreground">Pagamento único</p>
+                </div>
+
+                <span className="rounded-md bg-secondary px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                  Pacote inicial
+                </span>
+              </div>
+            </button>
+
+            {/* PLANO VITALÍCIO */}
+            <button
+              type="button"
+              aria-pressed={selected === "lifetime"}
+              onClick={() => setSelected("lifetime")}
+              className={`
+                relative mt-4 w-full rounded-xl border-2 p-4
+                text-left transition-all duration-200
+                ${
+                  selected === "lifetime"
+                    ? "border-primary bg-primary/10 shadow-md"
+                    : "border-primary/50 bg-primary/5 hover:border-primary"
+                }
+              `}
+            >
+              {/* SELO */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                <span className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-primary-foreground shadow-sm">
+                  <Sparkles className="h-3 w-3" />
+                  MELHOR CUSTO-BENEFÍCIO
+                </span>
+              </div>
+
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <span className="text-[11px] font-semibold text-primary">PAGUE UMA VEZ, USE SEMPRE</span>
+
+                  <div className="mt-1 flex items-center gap-2">
+                    <InfinityIcon className="h-5 w-5 shrink-0 text-primary" />
+
+                    <h4 className="text-[17px] font-bold text-foreground">Vídeos ilimitados</h4>
+                  </div>
+
+                  <p className="mt-1 text-xs text-muted-foreground">Acesso vitalício, sem precisar recarregar</p>
+                </div>
+
+                <div
+                  className={`
+                    flex h-5 w-5 shrink-0 items-center justify-center
+                    rounded-full border-2
+                    ${
+                      selected === "lifetime"
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-muted-foreground/40"
+                    }
+                  `}
+                >
+                  {selected === "lifetime" && <Check className="h-3 w-3" />}
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-end justify-between gap-2">
+                <div>
+                  <span className="text-[27px] font-extrabold leading-none text-foreground">R$ 14,90</span>
+
+                  <p className="mt-1 text-[11px] text-muted-foreground">Uma única vez, sem mensalidades</p>
+                </div>
+
+                <span className="rounded-md bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">
+                  SEM RECARGAS
+                </span>
+              </div>
+
+              {/* BENEFÍCIOS */}
+              <div className="mt-3 space-y-2 border-t border-primary/15 pt-3">
+                <div className="flex items-center gap-2 text-xs text-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                  Gere vídeos sem limite de créditos
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                  Crie novos vídeos quando quiser
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-foreground">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
+                  Acesso vitalício, sem mensalidades
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* REFORÇO */}
+          <div className="mt-4 text-center">
+            <p className="text-xs font-medium text-foreground">Seu próximo vídeo começa aqui</p>
+
+            <p className="mt-1 text-[11px] text-muted-foreground">Escolha seu plano e continue criando.</p>
           </div>
         </div>
+
+        {/* RODAPÉ FIXO */}
         <div className="shrink-0 border-t border-border bg-card px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:px-6">
-          <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground"><LockKeyhole className="h-3 w-3" />Pagamento único via PIX · Sem mensalidade</p>
-          <button type="button" onClick={onDefer || onClose} className="mt-1 min-h-11 w-full touch-manipulation text-center text-xs text-muted-foreground transition-colors hover:text-foreground">Continuar depois</button>
+          {/* RESUMO */}
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <p className="text-[11px] text-muted-foreground">Seu plano selecionado</p>
+
+              <p className="text-sm font-semibold text-foreground">
+                {selected === "credits" ? "500 créditos" : "Vídeos ilimitados"}
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="text-xl font-extrabold text-foreground">{selectedPlan.price}</p>
+
+              <p className="text-[10px] text-muted-foreground">Pagamento único</p>
+            </div>
+          </div>
+
+          {/* BOTÃO DE COMPRA */}
+          <Button
+            type="button"
+            onClick={goToCheckout}
+            className="
+              h-[54px] w-full gap-2 rounded-xl
+              text-sm font-bold shadow-lg
+              transition-all duration-200
+              hover:brightness-110
+              active:scale-[0.99]
+            "
+          >
+            <LockKeyhole className="h-4 w-4 shrink-0" />
+
+            {selected === "credits" ? "Desbloquear meus 500 créditos" : "Garantir meus vídeos ilimitados"}
+
+            <ArrowRight className="h-4 w-4 shrink-0" />
+          </Button>
+
+          {/* SEGURANÇA */}
+          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <LockKeyhole className="h-3 w-3" />
+            Pagamento via PIX
+            <span>•</span>
+            <CreditCard className="h-3 w-3" />
+            Compra única
+          </div>
+
+          {/* FECHAR */}
+          <button
+            type="button"
+            onClick={onDefer || onClose}
+            className="mt-2 w-full py-1 text-center text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Continuar depois
+          </button>
         </div>
       </DialogContent>
     </Dialog>

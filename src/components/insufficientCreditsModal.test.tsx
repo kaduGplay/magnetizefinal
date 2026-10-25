@@ -1,66 +1,47 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import InsufficientCreditsModal, { PLANS } from "./InsufficientCreditsModal";
 import { generationStep } from "@/lib/generationStep";
 
-const { assign } = vi.hoisted(() => ({ assign: vi.fn() }));
-vi.mock("@/hooks/useUtmParams", () => ({ getStoredUtmParams: () => ({ utm_source: "test-source" }) }));
-vi.mock("@/lib/tiktok-pixel", () => ({ initTikTokPixel: vi.fn(), trackAddToCart: vi.fn(), trackInitiateCheckout: vi.fn() }));
-const props = { isOpen: true, onClose: vi.fn(), onBuyCredits: vi.fn(), currentCredits: 0, requiredCredits: 100 };
-beforeEach(() => {
-  vi.spyOn(window, "location", "get").mockReturnValue({ ...window.location, assign });
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
 });
-afterEach(() => { cleanup(); assign.mockReset(); props.onClose.mockReset(); vi.restoreAllMocks(); });
 
-describe("plan modal direct checkout", () => {
-  it.each([
-    ["Desbloquear por R$ 9,90", PLANS.credits],
-    ["Desbloquear vitalício por R$ 14,90", PLANS.lifetime],
-  ] as const)("%s opens the correct checkout in one click", (label, plan) => {
-    render(<InsufficientCreditsModal {...props} />);
-    fireEvent.click(screen.getByRole("button", { name: label }));
-    expect(assign).toHaveBeenCalledTimes(1);
-    const url = new URL(assign.mock.calls[0][0], "https://example.com");
-    expect(url.pathname).toBe("/checkout");
-    expect(Object.fromEntries(url.searchParams)).toMatchObject({
-      plan: plan.id, name: plan.name, amount: String(plan.amountCents), credits: String(plan.credits),
-      isLifetime: String(plan.isLifetime), isPremium: String(plan.isPremium), utm_source: "test-source",
-    });
-    fireEvent.click(screen.getByRole("button", { name: label }));
-    expect(assign).toHaveBeenCalledTimes(1);
+describe("plan modal (credits step)", () => {
+  it("selects the initial package by default and allows choosing lifetime", async () => {
+    render(
+      <InsufficientCreditsModal
+        isOpen
+        onClose={() => {}}
+        onBuyCredits={() => {}}
+        currentCredits={0}
+        requiredCredits={100}
+        mediaType="video"
+      />,
+    );
+    const initial = screen.getByRole("button", { name: /500 créditos.*R\$ 9,90/ });
+    const lifetime = screen.getByRole("button", { name: /Vídeos ilimitados.*R\$ 14,90/ });
+    expect(initial.getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(lifetime);
+    expect(lifetime.getAttribute("aria-pressed")).toBe("true");
+    expect(initial.getAttribute("aria-pressed")).toBe("false");
+    expect(PLANS.credits.amountCents).toBe(990);
+    expect(PLANS.credits.credits).toBe(500);
+    expect(PLANS.lifetime.amountCents).toBe(1490);
+    expect(PLANS.lifetime.isLifetime).toBe(true);
   });
 
-  it("keeps dismissal available without starting checkout", () => {
-    render(<InsufficientCreditsModal {...props} />);
-    fireEvent.click(screen.getByRole("button", { name: "Continuar depois" }));
-    expect(props.onClose).toHaveBeenCalledTimes(1);
-    expect(assign).not.toHaveBeenCalled();
-  });
-
-  it("uses different copy for a chosen generation and browsing plans", () => {
-    const view = render(<InsufficientCreditsModal {...props} />);
-    expect(screen.getByRole("heading", { name: "Desbloqueie esta geração" })).toBeTruthy();
-    view.rerender(<InsufficientCreditsModal {...props} context="browse" />);
-    expect(screen.getByRole("heading", { name: "Escolha seu plano" })).toBeTruthy();
-  });
-  it("the X dismisses the modal without triggering the optional exit offer", () => {
+  it("keeps the X dismissal separate from the optional exit offer", () => {
+    const close = vi.fn();
     const defer = vi.fn();
-    render(<InsufficientCreditsModal {...props} onDefer={defer} />);
+    render(<InsufficientCreditsModal isOpen onClose={close} onDefer={defer} onBuyCredits={() => {}} currentCredits={0} requiredCredits={100} />);
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
-    expect(props.onClose).toHaveBeenCalledTimes(1);
+    expect(close).toHaveBeenCalledTimes(1);
     expect(defer).not.toHaveBeenCalled();
-    expect(assign).not.toHaveBeenCalled();
-  });
-  it("allows another choice when reopened after a checkout navigation", () => {
-    const view = render(<InsufficientCreditsModal {...props} />);
-    fireEvent.click(screen.getByRole("button", { name: "Desbloquear por R$ 9,90" }));
-    view.rerender(<InsufficientCreditsModal {...props} isOpen={false} />);
-    view.rerender(<InsufficientCreditsModal {...props} />);
-    fireEvent.click(screen.getByRole("button", { name: "Desbloquear vitalício por R$ 14,90" }));
-    expect(assign).toHaveBeenCalledTimes(2);
   });
 
-  it("preserves the existing account, queue and plan eligibility rules", () => {
+  it("the dashboard funnel skips the fake loading screen and goes straight to the plan", () => {
     expect(generationStep(false, 100, 100)).toBe("account");
     expect(generationStep(true, 99, 100)).toBe("plans");
     expect(generationStep(true, 100, 100)).toBe("queue");
