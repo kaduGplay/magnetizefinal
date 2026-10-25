@@ -10,10 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { trackPageView } from "@/lib/facebook-pixel";
 import { preloadAppResources } from "@/lib/preloadAppResources";
 import Index from "./pages/Index";
-import { useSitePresence } from "@/hooks/useSitePresence";
 import NotFound from "./pages/NotFound";
 
-const Analysis = lazy(() => import("./pages/Analysis"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const ThankYou = lazy(() => import("./pages/ThankYou"));
@@ -39,7 +37,6 @@ const AuthSessionSync = () => {
 
 const AppContent = () => {
   useTikTokPixel();
-  useSitePresence();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -68,7 +65,6 @@ const AppContent = () => {
       <AuthSessionSync />
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/analise" element={<Analysis />} />
         {/* Rotas virtuais do funil da landing (modais contam como páginas) */}
         <Route path="/escolher-modelo" element={<Index />} />
         <Route path="/gerando" element={<Index />} />

@@ -1,3 +1,1 @@
 project_id = "lyrhdqogpkflgaszbrhp"
-[functions.site-analytics]
-verify_jwt = false
