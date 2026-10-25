@@ -85,3 +85,16 @@ O frontend é estático (Vite/React). A autenticação, os dados e o PIX continu
 6. Confira a landing, acesso direto e atualização de `/dashboard`, `/auth` e `/checkout`, reprodução dos vídeos e login com e-mail. Valide o PIX somente com uma transação de teste autorizada.
 
 Para validar localmente: `npm ci`, `npm test`, `npm run build` e `npm run preview`. Copie `.env.example` para `.env` e preencha os dois valores antes do build. As funções e os segredos do backend permanecem no Supabase; não são implantados pelo build da Vercel.
+
+## Painel de análise `/analise`
+
+O painel público mostra visitantes online (última atividade até 60 segundos), visitantes únicos nas últimas 2h e 4h e até 200 acessos recentes. Atualiza a cada 15 segundos; cada navegador visível envia atividade a cada 20 segundos. Várias abas do mesmo navegador usam o mesmo identificador. Não são pessoas identificadas nem contagens de todas as visualizações: cada linha mostra a última atividade de um navegador. A página de análise não entra na contagem.
+
+Para ativar no projeto Supabase deste site:
+
+1. Execute `supabase/sql/site_analytics.sql` no SQL Editor do projeto `lyrhdqogpkflgaszbrhp`. A tabela tem RLS e acesso direto restrito ao backend.
+2. Publique a Edge Function `site-analytics` com verificação JWT desativada conforme `supabase/config.toml`. A função permite coleta e leitura pública de métricas anônimas, conforme solicitado; não retorna dados de contas, fotos, pagamentos ou IPs.
+3. Configure `VITE_ANALYTICS_ENABLED=true` na Vercel em Production e faça um novo deploy. Até essa configuração, nenhuma coleta é enviada e o painel informa que ainda não foi ativado.
+4. Abra o site em outro navegador, confira a atualização do painel e o desaparecimento do online cerca de 60 segundos após fechar a aba. As janelas de 2h e 4h começam a acumular dados após a ativação, sem recuperar visitas anteriores.
+
+A função registra horários do servidor e normaliza os caminhos, removendo query strings e identificadores das subrotas. Registros inativos há mais de 24h são limpos periodicamente durante a coleta. Se o backend falhar, o painel informa a indisponibilidade em vez de mostrar números inventados. Este painel mede presença; não confirma gerações nem pagamentos.
