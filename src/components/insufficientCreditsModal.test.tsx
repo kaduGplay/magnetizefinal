@@ -1,35 +1,30 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import InsufficientCreditsModal, { PLANS } from "./InsufficientCreditsModal";
 import { generationStep } from "@/lib/generationStep";
 
+const { assign } = vi.hoisted(() => ({ assign: vi.fn() }));
+vi.mock("@/hooks/useUtmParams", () => ({ getStoredUtmParams: () => ({ utm_source: "test-source" }) }));
+vi.mock("@/lib/tiktok-pixel", () => ({ initTikTokPixel: vi.fn(), trackAddToCart: vi.fn(), trackInitiateCheckout: vi.fn() }));
+beforeEach(() => { vi.spyOn(window, "location", "get").mockReturnValue({ ...window.location, assign }); });
 afterEach(() => {
   cleanup();
+  assign.mockReset();
   vi.restoreAllMocks();
 });
 
 describe("plan modal (credits step)", () => {
-  it("selects the initial package by default and allows choosing lifetime", async () => {
-    render(
-      <InsufficientCreditsModal
-        isOpen
-        onClose={() => {}}
-        onBuyCredits={() => {}}
-        currentCredits={0}
-        requiredCredits={100}
-        mediaType="video"
-      />,
-    );
-    const initial = screen.getByRole("button", { name: /500 créditos.*R\$ 9,90/ });
-    const lifetime = screen.getByRole("button", { name: /Vídeos ilimitados.*R\$ 14,90/ });
-    expect(initial.getAttribute("aria-pressed")).toBe("true");
-    fireEvent.click(lifetime);
-    expect(lifetime.getAttribute("aria-pressed")).toBe("true");
-    expect(initial.getAttribute("aria-pressed")).toBe("false");
-    expect(PLANS.credits.amountCents).toBe(990);
-    expect(PLANS.credits.credits).toBe(500);
-    expect(PLANS.lifetime.amountCents).toBe(1490);
-    expect(PLANS.lifetime.isLifetime).toBe(true);
+  it.each([PLANS.credits, PLANS.lifetime])("opens the correct checkout directly from the $name plan", (plan) => {
+    render(<InsufficientCreditsModal isOpen onClose={() => {}} onBuyCredits={() => {}} currentCredits={0} requiredCredits={100} />);
+    const button = screen.getByRole("button", { name: `Ir para pagamento · ${plan.price}` });
+    expect(button.closest("section")).not.toBeNull();
+    fireEvent.click(button);
+    expect(assign).toHaveBeenCalledTimes(1);
+    const url = new URL(assign.mock.calls[0][0], "https://example.com");
+    expect(url.pathname).toBe("/checkout");
+    expect(Object.fromEntries(url.searchParams)).toMatchObject({ plan: plan.id, name: plan.name, amount: String(plan.amountCents), credits: String(plan.credits), isLifetime: String(plan.isLifetime), isPremium: String(plan.isPremium), utm_source: "test-source" });
+    fireEvent.click(button);
+    expect(assign).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the X dismissal separate from the optional exit offer", () => {
@@ -54,9 +49,8 @@ describe("plan modal (credits step)", () => {
   it("makes the payment step and selected price explicit", () => {
     render(<InsufficientCreditsModal isOpen onClose={() => {}} onBuyCredits={() => {}} currentCredits={0} requiredCredits={100} />);
     expect(screen.getByText(/Os créditos serão liberados após a confirmação do pagamento via PIX/)).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Ir para pagamento · R$ 9,90" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Vídeos ilimitados.*R\$ 14,90/ }));
-    expect(screen.getByRole("button", { name: "Ir para pagamento · R$ 14,90" })).toBeTruthy();
+    expect(within(screen.getByRole("region", { name: "500 créditos" })).getByRole("button", { name: "Ir para pagamento · R$ 9,90" })).toBeTruthy();
+    expect(within(screen.getByRole("region", { name: "Acesso vitalício" })).getByRole("button", { name: "Ir para pagamento · R$ 14,90" })).toBeTruthy();
   });
 
   it("the dashboard funnel skips the fake loading screen and goes straight to the plan", () => {
