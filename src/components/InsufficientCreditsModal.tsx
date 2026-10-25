@@ -161,14 +161,15 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generat
             </div>
           </div>
 
+          {context === "generation" && <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-widest text-primary">Geração escolhida · Etapa de créditos</p>}
           {/* TÍTULO */}
           <DialogTitle className="pr-5 text-center font-display text-[23px] font-bold leading-tight text-foreground">
-            {context === "browse" ? "Conheça nossos planos" : "Seu vídeo está quase pronto para gerar!"}
+            {context === "browse" ? "Conheça nossos planos" : "Créditos para a geração escolhida"}
           </DialogTitle>
 
           {/* DESCRIÇÃO */}
           <DialogDescription className="mx-auto mt-2 max-w-[340px] text-center text-[13px] leading-relaxed text-muted-foreground">
-            {context === "browse" ? "Compare as opções e escolha o plano ideal para você. Pagamento único, sem mensalidade." : "Você já escolheu o vídeo que deseja criar. Agora só falta desbloquear seus créditos para continuar."}
+            {context === "browse" ? "Compare as opções e escolha o plano ideal para você. Pagamento único, sem mensalidade." : "Você escolheu uma geração. Agora selecione os créditos para continuar. O pagamento será feito na próxima etapa, via PIX."}
           </DialogDescription>
 
           {/* DESTAQUE */}
@@ -176,7 +177,7 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generat
             <Zap className="h-4 w-4 shrink-0 text-primary" />
 
             <p className="text-center text-xs font-medium text-foreground">
-              {context === "browse" ? "Créditos ou acesso vitalício: escolha como continuar" : "Desbloqueie a geração do seu vídeo com um único pagamento"}
+              {context === "browse" ? "Créditos ou acesso vitalício: escolha como continuar" : "Os créditos valem para esta geração e para as próximas"}
             </p>
           </div>
 

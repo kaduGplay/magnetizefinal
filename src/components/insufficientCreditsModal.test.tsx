@@ -45,10 +45,10 @@ describe("plan modal (credits step)", () => {
     const props = { isOpen: true, onClose: () => {}, onBuyCredits: () => {}, currentCredits: 0, requiredCredits: 100 };
     const view = render(<InsufficientCreditsModal {...props} context="browse" />);
     expect(screen.getByRole("heading", { name: "Conheça nossos planos" })).toBeTruthy();
-    expect(screen.queryByText(/Você já escolheu o vídeo/)).toBeNull();
+    expect(screen.queryByText(/Você escolheu uma geração/)).toBeNull();
     view.rerender(<InsufficientCreditsModal {...props} context="generation" />);
-    expect(screen.getByRole("heading", { name: "Seu vídeo está quase pronto para gerar!" })).toBeTruthy();
-    expect(screen.getByText(/Você já escolheu o vídeo/)).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Créditos para a geração escolhida" })).toBeTruthy();
+    expect(screen.getByText(/Você escolheu uma geração/)).toBeTruthy();
   });
 
   it("the dashboard funnel skips the fake loading screen and goes straight to the plan", () => {

@@ -58,6 +58,9 @@ for (const [name, Page] of [["dashboard", Dashboard]] as const) {
     it("shows the original credit menu without presenting unavailable actions as working", () => {
       render(<MemoryRouter><Dashboard /></MemoryRouter>);
       fireEvent.click(screen.getByRole("button", { name: "Abrir menu" }));
+      expect(screen.getByText("Perfil privado")).toBeTruthy();
+      expect(screen.getByText("Pagamento via PIX")).toBeTruthy();
+      expect(screen.queryByText("Modo Anônimo Ativo")).toBeNull();
       const menu = within(screen.getByRole("navigation", { name: "Navegação da dashboard" }));
       expect(menu.getByRole("button", { name: "Adquirir Créditos" })).not.toBeDisabled();
       for (const name of ["Gerar com Fotos", "Conteúdo Premium", "Resgatar Créditos"]) {
