@@ -138,7 +138,7 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generat
                 <span className="whitespace-nowrap text-xl font-extrabold text-foreground">{PLANS.credits.price}</span>
               </div>
               <Button type="button" variant="outline" disabled={checkoutPlan !== null} onClick={() => goToCheckout("credits")} className="mt-4 h-12 w-full touch-manipulation rounded-xl border-primary/40 text-sm font-bold">
-                {checkoutPlan === "credits" ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
+                {checkoutPlan === "credits" && <Loader2 className="h-4 w-4 animate-spin" />}
                 <span className="min-w-0 whitespace-normal leading-tight">Ir para pagamento · {PLANS.credits.price}</span><ArrowRight className="h-4 w-4" />
               </Button>
             </section>
@@ -151,7 +151,7 @@ const InsufficientCreditsModal = ({ isOpen, onClose, onDefer, context = "generat
               </div>
               <p className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-foreground"><CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />Vitalício por mais {priceDifference}</p>
               <Button type="button" disabled={checkoutPlan !== null} onClick={() => goToCheckout("lifetime")} className="mt-4 h-12 w-full touch-manipulation rounded-xl text-sm font-bold shadow-lg shadow-primary/20">
-                {checkoutPlan === "lifetime" ? <Loader2 className="h-4 w-4 animate-spin" /> : <LockKeyhole className="h-4 w-4" />}
+                {checkoutPlan === "lifetime" && <Loader2 className="h-4 w-4 animate-spin" />}
                 <span className="min-w-0 whitespace-normal leading-tight">Ir para pagamento · {PLANS.lifetime.price}</span><ArrowRight className="h-4 w-4" />
               </Button>
             </section>
