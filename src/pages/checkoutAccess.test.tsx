@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import Checkout from "./Checkout";
 
@@ -15,7 +15,7 @@ vi.mock("@/lib/facebook-pixel", () => ({ initFacebookPixel: vi.fn(), trackViewCo
 vi.mock("@/lib/tiktok-pixel", () => ({ initTikTokPixel: vi.fn(), trackViewContent: vi.fn(), trackInitiateCheckout: vi.fn() }));
 const path = "/checkout?plan=credit-pack-500&name=500+Créditos&amount=990&credits=500";
 const AuthDestination = () => <div>Retorno: {useLocation().state?.returnTo}</div>;
-const mount = (entry = path) => render(<MemoryRouter initialEntries={[entry]}><Routes><Route path="/checkout" element={<Checkout />} /><Route path="/auth" element={<AuthDestination />} /></Routes></MemoryRouter>);
+const mount = (entry = path) => render(<MemoryRouter initialEntries={[entry]}><Routes><Route path="/checkout" element={<Checkout />} /><Route path="/auth" element={<AuthDestination />} /><Route path="/dashboard" element={<div>Checkout fechado</div>} /></Routes></MemoryRouter>);
 afterEach(() => { cleanup(); vi.resetAllMocks(); mocks.auth.profile = null; mocks.auth.isAuthenticated = false; localStorage.clear(); });
 describe("checkout access and validity", () => {
   it("preserves the complete checkout when login is required", async () => {
@@ -56,6 +56,15 @@ describe("checkout access and validity", () => {
     mocks.auth.profile = { id: "user", full_name: "Teste", email: "teste@example.com", phone: null }; mocks.auth.isAuthenticated = true;
     mount("/checkout?plan=unknown&name=Invalid&amount=990");
     expect(await screen.findByText("Dados do plano inválidos")).toBeTruthy();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+  });
+
+  it("lets the visitor leave checkout while the session is still being checked", () => {
+    mocks.auth.profile = { id: "user", full_name: "Teste", email: "teste@example.com", phone: null }; mocks.auth.isAuthenticated = true;
+    mocks.access.mockImplementation(() => new Promise(() => {}));
+    mount();
+    fireEvent.click(screen.getByRole("button", { name: "Sair do checkout" }));
+    expect(screen.getByText("Checkout fechado")).toBeTruthy();
     expect(mocks.invoke).not.toHaveBeenCalled();
   });
 

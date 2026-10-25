@@ -64,7 +64,7 @@ const DialogContent = React.forwardRef<
         {children}
         <DialogPrimitive.Close
           className={cn(
-            "absolute z-30 rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
+            "pointer-events-auto absolute z-50 flex h-12 w-12 touch-manipulation items-center justify-center rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
             fullscreen
               ? "right-4 top-[max(1rem,env(safe-area-inset-top))] border border-white/10 bg-black/50 p-2 backdrop-blur"
               : "right-4 top-4",

@@ -348,7 +348,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="pointer-events-auto min-h-screen bg-background">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -357,7 +357,7 @@ const Checkout = () => {
 
       {/* Header */}
       <header className="sticky top-0 z-30">
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-border/50" />
+        <div className="pointer-events-none absolute inset-0 bg-background/70 backdrop-blur-xl border-b border-border/50" />
         <div className="container relative flex h-16 items-center justify-center px-4">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -376,7 +376,7 @@ const Checkout = () => {
             onClick={() => navigate("/dashboard")}
             aria-label="Sair do checkout"
             title="Sair do checkout"
-            className="absolute right-4 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-primary/45 bg-secondary/90 text-foreground shadow-lg shadow-black/40 transition-colors hover:border-primary/70 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            className="pointer-events-auto absolute right-2 top-1/2 z-40 inline-flex h-12 w-12 touch-manipulation -translate-y-1/2 items-center justify-center rounded-full border border-primary/45 bg-secondary/90 text-foreground shadow-lg shadow-black/40 transition-colors hover:border-primary/70 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             <X className="h-4 w-4" />
           </button>

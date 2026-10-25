@@ -41,9 +41,9 @@ const LoginCodeModal = ({ isOpen, onClose, onCreateNew, onSuccess, navigateOnSuc
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/95 p-3 backdrop-blur-xl sm:p-4">
+    <div className="pointer-events-auto fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-background/95 p-3 backdrop-blur-xl sm:p-4">
       <form onSubmit={handleSubmit} className="relative my-auto w-full max-w-sm overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-2xl sm:p-6">
-        <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Fechar" className="absolute right-3 top-3 rounded-full text-muted-foreground">✕</Button>
+        <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Fechar" className="pointer-events-auto absolute right-2 top-2 z-20 h-12 w-12 touch-manipulation rounded-full text-muted-foreground">✕</Button>
         <div className="mb-6 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary text-primary-foreground"><LogIn className="h-7 w-7" /></div>
           <h1 className="text-2xl font-black text-foreground">Entrar na conta</h1>

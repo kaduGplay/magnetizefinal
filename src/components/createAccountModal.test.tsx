@@ -1,8 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import CreateAccountModal from "./CreateAccountModal";
 
+const { signup } = vi.hoisted(() => ({ signup: vi.fn() }));
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ signup }) }));
+
 afterEach(() => {
+  signup.mockReset();
   cleanup();
   vi.restoreAllMocks();
 });
@@ -25,4 +29,32 @@ describe("create account modal", () => {
     expect(screen.queryByText(/nada se perde/i)).toBeNull();
     expect(screen.queryByText(/sem instalar nada/i)).toBeNull();
   });
+  it("closes the signup modal when the close button is clicked", () => {
+    const onClose = vi.fn();
+    render(<CreateAccountModal isOpen onClose={onClose} onOpenLogin={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "Fechar" }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(signup).not.toHaveBeenCalled();
+  });
+  it("reveals and hides the typed password without submitting the form", () => {
+    render(<CreateAccountModal isOpen onClose={() => {}} onOpenLogin={() => {}} />);
+    const password = screen.getByLabelText("Crie uma senha") as HTMLInputElement;
+    fireEvent.change(password, { target: { value: "example-password" } });
+    expect(password.type).toBe("password");
+    fireEvent.click(screen.getByRole("button", { name: "Mostrar senha" }));
+    expect(password.type).toBe("text");
+    expect(password.value).toBe("example-password");
+    fireEvent.click(screen.getByRole("button", { name: "Ocultar senha" }));
+    expect(password.type).toBe("password");
+    expect(signup).not.toHaveBeenCalled();
+  });
+  it("hides the password again when the modal is reopened", () => {
+    const props = { onClose: () => {}, onOpenLogin: () => {} };
+    const view = render(<CreateAccountModal isOpen {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "Mostrar senha" }));
+    view.rerender(<CreateAccountModal isOpen={false} {...props} />);
+    view.rerender(<CreateAccountModal isOpen {...props} />);
+    expect(screen.getByLabelText("Crie uma senha")).toHaveAttribute("type", "password");
+  });
+
 });

@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { ArrowRight, CheckCircle2, EyeOff, Loader2, LockKeyhole, PartyPopper } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, CheckCircle2, Eye, EyeOff, Loader2, LockKeyhole, PartyPopper } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
@@ -36,6 +36,8 @@ const CreateAccountModal = ({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  useEffect(() => { if (!isOpen) setShowPassword(false); }, [isOpen]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
@@ -154,7 +156,7 @@ const CreateAccountModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-background/90 p-3 backdrop-blur-xl sm:p-4">
+    <div className="pointer-events-auto fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-background/90 p-3 backdrop-blur-xl sm:p-4">
       <div className="relative my-auto w-full max-w-md overflow-hidden rounded-3xl border border-border/80 bg-card/90 shadow-2xl backdrop-blur-xl">
         <div className="pointer-events-none absolute -right-20 -top-20 h-44 w-44 rounded-full bg-primary/15 blur-3xl" />
 
@@ -164,7 +166,7 @@ const CreateAccountModal = ({
           size="icon"
           onClick={onClose}
           aria-label="Fechar"
-          className="absolute right-3 top-3 z-20 rounded-full text-muted-foreground hover:bg-muted"
+          className="pointer-events-auto absolute right-2 top-2 z-30 h-12 w-12 touch-manipulation rounded-full text-muted-foreground hover:bg-muted"
         >
           ✕
         </Button>
@@ -260,19 +262,30 @@ const CreateAccountModal = ({
                   />
                 </label>
 
-                <label className="block">
-                  <span className="mb-1.5 ml-1 block text-xs font-semibold text-muted-foreground">Senha</span>
-
-                  <input
+                <div className="block">
+                  <label htmlFor="create-account-password" className="mb-1.5 ml-1 block text-xs font-semibold text-muted-foreground">Senha</label>
+                  <div className="relative">
+                    <input
+                    id="create-account-password"
                     aria-label="Crie uma senha"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     placeholder="Mínimo de 6 caracteres"
-                    className="h-12 w-full rounded-xl border border-border bg-background/70 px-4 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    className="h-12 w-full rounded-xl border border-border bg-background/70 pl-4 pr-14 text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
-                </label>
+                    <button
+                      type="button"
+                      aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                      aria-pressed={showPassword}
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="absolute right-0 top-0 flex h-12 w-12 touch-manipulation items-center justify-center rounded-xl text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {error && (
